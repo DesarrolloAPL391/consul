@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registro de novedades</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>try { if (localStorage.getItem('consultor-tema') === 'dark') document.documentElement.dataset.theme = 'dark'; } catch {}</script>
+</head>
+<body>
+  <div id="cargando" class="cargando">Cargando…</div>
+
+  <!-- ===== Login ===== -->
+  <div id="vista-login" class="login-wrap" hidden>
+    <form id="login-form" class="card login-card" novalidate>
+      <p class="tag">Registro de novedades</p>
+      <h1>Iniciar sesión</h1>
+      <div class="field">
+        <label for="login-email">Correo</label>
+        <input id="login-email" type="email" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="login-pass">Contraseña</label>
+        <input id="login-pass" type="password" autocomplete="current-password" required>
+      </div>
+      <p id="login-error" class="error" role="alert"></p>
+      <button id="login-btn" type="submit" class="btn primary block">Entrar</button>
+      <p class="muted small">Una sola sesión por usuario: si entras en otro dispositivo, esta se cierra.</p>
+    </form>
+  </div>
+
+  <!-- ===== App ===== -->
+  <div id="vista-app" hidden>
+    <header class="topbar">
+      <div class="topbar-in">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">N</span>
+          <span class="brand-name">Novedades</span>
+        </div>
+
+        <nav class="tabs" role="tablist" aria-label="Secciones">
+          <button class="tab" role="tab" data-tab="nuevo" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Nuevo registro</span>
+          </button>
+          <button class="tab" role="tab" data-tab="registros" aria-selected="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            <span>Registros</span><span id="count" class="badge"></span>
+          </button>
+          <button class="tab" role="tab" data-tab="participantes" aria-selected="false" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6M22 19v-1a4 4 0 0 0-3-3.9M16 4.1a3 3 0 0 1 0 5.8"/></svg>
+            <span>Participantes</span>
+          </button>
+        </nav>
+
+        <div class="user">
+          <div class="user-info">
+            <strong id="yo-alias"></strong>
+            <span id="yo-empresa"></span>
+          </div>
+          <span id="yo-rol" class="pill medio"></span>
+          <button id="tema" class="icon-toggle" type="button" title="Cambiar tema" aria-label="Cambiar tema">
+            <svg class="luna" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            <svg class="sol" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          </button>
+          <button id="salir" class="btn ghost sm" type="button" title="Cerrar sesión">Salir</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel" id="tab-nuevo" role="tabpanel">
+        <div class="panel-head">
+          <h1>Nuevo registro</h1>
+          <p class="muted">Solo faltas laborales con investigación cerrada. Las categorías discriminatorias están bloqueadas.</p>
+        </div>
+        <form id="form" class="card form" novalidate>
+          <h2>Datos del trabajador</h2>
+          <div class="fields">
+            <div class="field">
+              <label for="identificacion">Identificación</label>
+              <input id="identificacion" inputmode="numeric" autocomplete="off" required>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="centro">Centro de costos</label>
+              <input id="centro" disabled>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="apellidos">Apellidos</label>
+              <input id="apellidos" autocomplete="off" required>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="nombres">Nombres</label>
+              <input id="nombres" autocomplete="off" required>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="inicio">Inicio</label>
+              <input id="inicio" type="date" required>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="fin">Fin</label>
+              <input id="fin" type="date" required>
+              <small class="error"></small>
+            </div>
+          </div>
+
+          <h2>Novedades</h2>
+          <div class="fields three">
+            <div class="field">
+              <label for="nov1">Novedad 1</label>
+              <select id="nov1" class="nov" required></select>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="nov2">Novedad 2 <span class="opt">(opcional)</span></label>
+              <select id="nov2" class="nov"></select>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="nov3">Novedad 3 <span class="opt">(opcional)</span></label>
+              <select id="nov3" class="nov"></select>
+              <small class="error"></small>
+            </div>
+          </div>
+          <p id="nov-hint" class="hint"></p>
+
+          <h2>Debido proceso</h2>
+          <div class="fields">
+            <div class="field">
+              <label for="expediente">N.º de expediente / soporte</label>
+              <input id="expediente" autocomplete="off" required>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="caducidad">Caducidad de la anotación</label>
+              <input id="caducidad" type="date" required>
+              <small class="error"></small>
+            </div>
+          </div>
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="g-investigacion"> Investigación cerrada con hallazgo documentado</label>
+            <label class="check"><input type="checkbox" id="g-descargos"> El trabajador presentó descargos</label>
+            <label class="check"><input type="checkbox" id="g-notificado"> El trabajador fue notificado de esta anotación</label>
+            <small class="error" id="g-error"></small>
+          </div>
+
+          <div class="actions">
+            <button type="reset" class="btn ghost">Limpiar</button>
+            <button type="submit" class="btn primary">Guardar registro</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" id="tab-registros" role="tabpanel" hidden>
+        <div class="list-head">
+          <div class="panel-head">
+            <h1>Registros de la empresa</h1>
+            <p class="muted">Solo ves los registros de tu empresa.</p>
+          </div>
+          <div class="list-tools">
+            <input id="buscar" type="search" placeholder="Buscar…" aria-label="Buscar registros">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Identificación</th><th>Trabajador</th><th>Periodo</th><th>Novedades</th>
+                <th>Expediente</th><th>Caduca</th><th>Registró</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="lista"></tbody>
+          </table>
+        </div>
+        <p id="vacio" class="muted">Aún no hay registros.</p>
+      </section>
+
+      <!-- ===== Solo administrador ===== -->
+      <section class="panel" id="tab-participantes" role="tabpanel" hidden>
+        <div class="panel-head">
+          <h1>Participantes</h1>
+          <p class="muted">Añade personas por correo y asígnales una empresa. Solo verán los registros de esa empresa.</p>
+        </div>
+        <form id="part-form" class="card form" novalidate>
+          <div class="fields">
+            <div class="field">
+              <label for="p-email">Correo</label>
+              <input id="p-email" type="email" autocomplete="off" required>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="p-alias">Alias (nombre)</label>
+              <input id="p-alias" autocomplete="off" required>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="p-empresa">Empresa</label>
+              <select id="p-empresa" required></select>
+              <small class="error"></small>
+            </div>
+            <div class="field">
+              <label for="p-pass">Clave temporal <span class="opt">(solo si el correo no tiene cuenta)</span></label>
+              <div class="input-row">
+                <input id="p-pass" autocomplete="new-password">
+                <button id="p-generar" type="button" class="btn ghost sm">Generar</button>
+              </div>
+              <small class="error"></small>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn primary">Añadir participante</button>
+          </div>
+        </form>
+
+        <div class="table-wrap mt">
+          <table>
+            <thead>
+              <tr><th>Alias</th><th>Correo</th><th>Empresa</th><th>Rol</th><th>Estado</th><th></th></tr>
+            </thead>
+            <tbody id="part-lista"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="catalogo.js"></script>
+  <script src="registro.js"></script>
+</body>
+</html>
