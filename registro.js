@@ -6,8 +6,6 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { storageKey: 'consultor-auth' },
 });
 
-const permitidos = CATALOGO.filter((c) => c.nivel !== 'ilegal');
-const bloqueados = CATALOGO.filter((c) => c.nivel === 'ilegal');
 
 let yo = null;          // contexto del participante (consultor_contexto)
 let registros = [];
@@ -17,6 +15,9 @@ let cerrando = false;
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (ch) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
 ));
+
+// Las empresas se muestran solo por su número.
+const numEmpresa = (n) => String(n).padStart(2, '0');
 
 const MENSAJES = {
   sesion: 'Tu sesión se cerró: tu cuenta se abrió en otro dispositivo.',
@@ -60,9 +61,9 @@ async function entrar() {
   }
   yo = data;
   $('yo-alias').textContent = yo.alias;
-  $('yo-empresa').textContent = yo.empresa_nombre;
+  $('yo-empresa').textContent = `Empresa ${numEmpresa(yo.empresa)}`;
   $('yo-rol').textContent = yo.rol === 'admin' ? 'Administrador' : 'Participante';
-  $('centro').value = `${String(yo.empresa).padStart(2, '0')} — ${yo.empresa_nombre}`;
+  $('centro').value = numEmpresa(yo.empresa);
   document.querySelector('[data-tab="participantes"]').hidden = yo.rol !== 'admin';
   irA(tabGuardada());
   mostrar('app');
@@ -96,6 +97,14 @@ async function cerrarSesion(msg, registrarCierre = false) {
   $('login-error').textContent = msg || '';
   mostrar('login');
   cerrando = false;
+}
+
+// En celular las tablas se ven como tarjetas: cada celda lleva el título de su columna.
+function etiquetar(tbody) {
+  const titulos = [...tbody.closest('table').querySelectorAll('thead th')].map((th) => th.textContent.trim());
+  tbody.querySelectorAll('tr').forEach((tr) => {
+    [...tr.children].forEach((td, i) => { if (titulos[i]) td.dataset.label = titulos[i]; });
+  });
 }
 
 // ---------- Pestañas ----------
@@ -160,24 +169,13 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) hear
 // ---------- Selects de novedades ----------
 function opcionesNovedad(opcional) {
   const vacia = `<option value="">${opcional ? '— Ninguna —' : '— Seleccione —'}</option>`;
-  const ok = permitidos.map((c) => `<option value="${c.code}">${c.code} — ${c.cat}</option>`).join('');
-  const no = bloqueados.map((c) => `<option value="${c.code}" disabled>${c.code} — ${c.cat} (prohibido)</option>`).join('');
-  return `${vacia}<optgroup label="Faltas laborales">${ok}</optgroup><optgroup label="No permitidas por ley">${no}</optgroup>`;
+  return vacia + CATALOGO.map((c) => `<option value="${c.code}">${c.code}</option>`).join('');
 }
 
 function initSelects() {
   $('nov1').innerHTML = opcionesNovedad(false);
   $('nov2').innerHTML = opcionesNovedad(true);
   $('nov3').innerHTML = opcionesNovedad(true);
-  document.querySelectorAll('.nov').forEach((s) => s.addEventListener('change', mostrarHint));
-}
-
-function mostrarHint() {
-  const codes = [...document.querySelectorAll('.nov')].map((s) => s.value).filter(Boolean);
-  $('nov-hint').innerHTML = codes.map((code) => {
-    const c = CATALOGO.find((x) => x.code === code);
-    return `<strong>${c.code}:</strong> ${escapeHtml(c.crit)}`;
-  }).join('<br>');
 }
 
 // ---------- Validación ----------
@@ -213,18 +211,17 @@ function validar() {
     const code = v(id);
     let msg = '';
     if (id === 'nov1' && !code) msg = 'Seleccione al menos una novedad.';
-    else if (code && bloqueados.some((b) => b.code === code)) msg = 'Categoría prohibida.';
     else if (code && vistos.has(code)) msg = 'Novedad repetida.';
     if (code) vistos.add(code);
     err(id, msg);
   });
 
-  err('expediente', v('expediente') ? '' : 'Sin soporte no hay falta que registrar.');
-  err('caducidad', !v('caducidad') ? 'Toda anotación debe caducar.'
+  err('expediente', v('expediente') ? '' : 'Requerido.');
+  err('caducidad', !v('caducidad') ? 'Requerido.'
     : v('fin') && v('caducidad') <= v('fin') ? 'Debe ser posterior a la fecha de fin.' : '');
 
   const garantias = ['g-investigacion', 'g-descargos', 'g-notificado'].every((id) => $(id).checked);
-  $('g-error').textContent = garantias ? '' : 'Sin estas tres garantías el registro no puede guardarse.';
+  $('g-error').textContent = garantias ? '' : 'Marque las tres confirmaciones para guardar.';
   if (!garantias) ok = false;
 
   return ok;
@@ -266,13 +263,14 @@ function renderLista() {
         <td class="code">${escapeHtml(r.identificacion)}</td>
         <td>${escapeHtml(r.apellidos)}, ${escapeHtml(r.nombres)}</td>
         <td class="nowrap">${formatoFecha(r.inicio)} – ${formatoFecha(r.fin)}</td>
-        <td>${r.novedades.map((c) => `<span class="pill medio" title="${escapeHtml(CATALOGO.find((x) => x.code === c)?.cat)}">${escapeHtml(c)}</span>`).join(' ')}</td>
+        <td>${r.novedades.map((c) => `<span class="pill medio">${escapeHtml(c)}</span>`).join(' ')}</td>
         <td>${escapeHtml(r.expediente)}</td>
         <td class="nowrap">${formatoFecha(r.caducidad)}${caducado ? ' <span class="pill alto">Caducado</span>' : ''}</td>
         <td class="small muted">${escapeHtml(r.creado_por_email)}</td>
         <td>${r.puede_eliminar ? `<button class="icon-btn" data-id="${escapeHtml(r.id)}" aria-label="Eliminar registro">✕</button>` : ''}</td>
       </tr>`;
   }).join('');
+  etiquetar($('lista'));
 }
 
 $('form').addEventListener('submit', async (e) => {
@@ -309,8 +307,7 @@ $('form').addEventListener('reset', () => {
   setTimeout(() => {
     limpiarErrores($('form'));
     $('g-error').textContent = '';
-    $('nov-hint').innerHTML = '';
-    if (yo) $('centro').value = `${String(yo.empresa).padStart(2, '0')} — ${yo.empresa_nombre}`;
+    if (yo) $('centro').value = numEmpresa(yo.empresa);
   });
 });
 
@@ -333,7 +330,7 @@ async function cargarEmpresas() {
   try {
     const res = await rpc('consultor_empresas');
     $('p-empresa').innerHTML = '<option value="">— Seleccione —</option>' + (res.data || []).map((e) =>
-      `<option value="${e.codigo}">${String(e.codigo).padStart(2, '0')} — ${escapeHtml(e.nombre)}</option>`).join('');
+      `<option value="${e.codigo}">${numEmpresa(e.codigo)}</option>`).join('');
   } catch (e) {
     if (yo) toast(e.message, true);
   }
@@ -346,7 +343,7 @@ async function cargarParticipantes() {
       <tr class="${p.activo ? '' : 'caducado'}">
         <td><strong>${escapeHtml(p.alias)}</strong>${p.es_yo ? ' <span class="muted small">(tú)</span>' : ''}</td>
         <td>${escapeHtml(p.email)}</td>
-        <td><span class="muted">${String(p.empresa).padStart(2, '0')}</span> ${escapeHtml(p.empresa_nombre)}</td>
+        <td>${numEmpresa(p.empresa)}</td>
         <td>${p.rol === 'admin' ? 'Administrador' : 'Participante'}</td>
         <td class="nowrap">
           <span class="dot ${p.conectado ? 'on' : ''}" title="${p.conectado ? 'Conectado' : 'Desconectado'}"></span>
@@ -358,6 +355,7 @@ async function cargarParticipantes() {
           <button class="icon-btn" data-accion="eliminar" data-email="${escapeHtml(p.email)}" aria-label="Quitar participante">✕</button>`}
         </td>
       </tr>`).join('');
+    etiquetar($('part-lista'));
   } catch (e) {
     if (yo) toast(e.message, true);
   }

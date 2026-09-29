@@ -350,3 +350,64 @@ section.panel { border-top: 0; padding-top: 28px; animation: entrar .25s ease; }
 /* Sombras suaves en claro */
 .card, .table-wrap { box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.06); }
 :root[data-theme="dark"] .card, :root[data-theme="dark"] .table-wrap { box-shadow: none; }
+
+/* ---------- Celular ---------- */
+@media (max-width: 720px) {
+  body { font-size: 15px; }
+  main { padding: 0 12px; }
+  section.panel { padding-top: 18px; padding-bottom: 24px; }
+  .panel-head h1 { font-size: 1.35rem; }
+  .card { padding: 16px; border-radius: 12px; }
+
+  .topbar-in { padding: 8px 12px; gap: 8px; }
+  .brand-name { display: none; }
+  .user { gap: 6px; }
+  .user .pill { display: none; }
+
+  /* Campos: una columna, tamaño cómodo para el dedo (16px evita el zoom en iPhone) */
+  .field input, .field select, .list-tools input { font-size: 16px; min-height: 44px; }
+  .check { padding: 8px 0; }
+  .check input { width: 20px; height: 20px; margin-top: 2px; flex: none; }
+
+  .actions { flex-direction: column-reverse; }
+  .actions .btn { width: 100%; min-height: 46px; }
+
+  .list-head { flex-direction: column; align-items: stretch; }
+  .list-tools, .list-tools input { width: 100%; }
+
+  /* Tablas como tarjetas */
+  .table-wrap { border: 0; background: transparent; box-shadow: none; overflow: visible; }
+  .table-wrap table, .table-wrap tbody, .table-wrap tr, .table-wrap td { display: block; width: 100%; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .table-wrap td {
+    border: 0;
+    padding: 5px 0;
+    display: flex; justify-content: space-between; gap: 12px;
+    text-align: right;
+  }
+  .table-wrap td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+    text-align: left; flex: none;
+  }
+  .table-wrap td:not([data-label])::before, .table-wrap td[data-label=""]::before { content: none; }
+  .table-wrap td:empty { display: none; }
+  .table-wrap td.nowrap { white-space: normal; }
+
+  /* Acciones de la fila: abajo, a lo ancho */
+  .table-wrap td:last-child { justify-content: flex-end; flex-wrap: wrap; padding-top: 8px; }
+  #lista td:last-child { position: absolute; top: 6px; right: 8px; width: auto; padding: 0; }
+  #lista td:first-child { padding-right: 36px; }
+  .btn.sm { min-height: 36px; }
+
+  .toast { bottom: 16px; width: calc(100% - 32px); text-align: center; }
+}
