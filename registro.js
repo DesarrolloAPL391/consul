@@ -249,7 +249,7 @@ function renderLista() {
   const hoy = new Date().toISOString().slice(0, 10);
 
   const filtrados = registros.filter((r) => !q || [
-    r.identificacion, r.apellidos, r.nombres, r.expediente, r.creado_por_email, ...r.novedades,
+    r.identificacion, r.apellidos, r.nombres, r.creado_por_email, ...r.novedades,
   ].join(' ').toLowerCase().includes(q));
 
   $('count').textContent = registros.length || '';
@@ -264,7 +264,6 @@ function renderLista() {
         <td>${escapeHtml(r.apellidos)}, ${escapeHtml(r.nombres)}</td>
         <td class="nowrap">${formatoFecha(r.inicio)} – ${formatoFecha(r.fin)}</td>
         <td>${r.novedades.map((c) => `<span class="pill medio">${escapeHtml(c)}</span>`).join(' ')}</td>
-        <td>${escapeHtml(r.expediente)}</td>
         <td class="nowrap">${formatoFecha(r.caducidad)}${caducado ? ' <span class="pill alto">Caducado</span>' : ''}</td>
         <td class="small muted">${escapeHtml(r.creado_por_email)}</td>
         <td>${r.puede_eliminar ? `<button class="icon-btn" data-id="${escapeHtml(r.id)}" aria-label="Eliminar registro">✕</button>` : ''}</td>
