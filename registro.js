@@ -245,16 +245,16 @@ async function cargarRegistros() {
 }
 
 function renderLista() {
-  const q = $('buscar').value.trim().toLowerCase();
+  // Solo se muestran resultados al buscar una cédula (siempre dentro de la propia empresa).
+  const q = $('buscar').value.replace(/\D/g, '');
   const hoy = new Date().toISOString().slice(0, 10);
 
-  const filtrados = registros.filter((r) => !q || [
-    r.identificacion, r.apellidos, r.nombres, r.creado_por_email, ...r.novedades,
-  ].join(' ').toLowerCase().includes(q));
+  const filtrados = q ? registros.filter((r) => r.identificacion.includes(q)) : [];
 
   $('count').textContent = registros.length || '';
   $('vacio').hidden = filtrados.length > 0;
-  $('vacio').textContent = registros.length ? 'Ningún registro coincide con la búsqueda.' : 'Aún no hay registros.';
+  $('vacio').textContent = !q ? 'Escriba una cédula para buscar.' : 'No hay registros con esa cédula.';
+  $('lista').closest('.table-wrap').hidden = filtrados.length === 0;
 
   $('lista').innerHTML = filtrados.map((r) => {
     const caducado = r.caducidad < hoy;
