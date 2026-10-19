@@ -128,24 +128,28 @@
             </div>
           </div>
 
-          <h2>Debido proceso</h2>
-          <div class="fields">
-            <div class="field">
-              <label for="expediente">N.º de expediente / soporte</label>
-              <input id="expediente" autocomplete="off" required>
-              <small class="error"></small>
+          <!-- Debido proceso: oculto. Para mostrarlo, quite "hidden" y ponga USAR_DEBIDO_PROCESO = true en registro.js -->
+          <div id="debido-proceso" hidden>
+            <h2>Debido proceso</h2>
+            <div class="fields">
+              <div class="field">
+                <label for="expediente">N.º de expediente / soporte</label>
+                <input id="expediente" autocomplete="off">
+                <small class="error"></small>
+              </div>
+              <div class="field">
+                <label for="caducidad">Caducidad de la anotación</label>
+                <input id="caducidad" type="date">
+                <small class="error"></small>
+              </div>
             </div>
-            <div class="field">
-              <label for="caducidad">Caducidad de la anotación</label>
-              <input id="caducidad" type="date" required>
-              <small class="error"></small>
+            <div class="checks">
+              <label class="check"><input type="checkbox" id="g-investigacion"> Investigación cerrada con hallazgo documentado</label>
+              <label class="check"><input type="checkbox" id="g-descargos"> El trabajador presentó descargos</label>
+              <label class="check"><input type="checkbox" id="g-notificado"> El trabajador fue notificado de esta anotación</label>
+              <small class="error" id="g-error"></small>
             </div>
-          </div>
-          <div class="checks">
-            <label class="check"><input type="checkbox" id="g-investigacion"> Investigación cerrada con hallazgo documentado</label>
-            <label class="check"><input type="checkbox" id="g-descargos"> El trabajador presentó descargos</label>
-            <label class="check"><input type="checkbox" id="g-notificado"> El trabajador fue notificado de esta anotación</label>
-            <small class="error" id="g-error"></small>
+
           </div>
 
           <div class="actions">
@@ -237,3 +241,4 @@
   <script src="registro.js"></script>
 </body>
 </html>
+
