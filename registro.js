@@ -7,6 +7,9 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 
+// Sección "Debido proceso" del formulario: false = oculta y sin validar.
+const USAR_DEBIDO_PROCESO = false;
+
 let yo = null;          // contexto del participante (consultor_contexto)
 let registros = [];
 let hbTimer = null;
@@ -216,13 +219,15 @@ function validar() {
     err(id, msg);
   });
 
-  err('expediente', v('expediente') ? '' : 'Requerido.');
-  err('caducidad', !v('caducidad') ? 'Requerido.'
-    : v('fin') && v('caducidad') <= v('fin') ? 'Debe ser posterior a la fecha de fin.' : '');
+  if (USAR_DEBIDO_PROCESO) {
+    err('expediente', v('expediente') ? '' : 'Requerido.');
+    err('caducidad', !v('caducidad') ? 'Requerido.'
+      : v('fin') && v('caducidad') <= v('fin') ? 'Debe ser posterior a la fecha de fin.' : '');
 
-  const garantias = ['g-investigacion', 'g-descargos', 'g-notificado'].every((id) => $(id).checked);
-  $('g-error').textContent = garantias ? '' : 'Marque las tres confirmaciones para guardar.';
-  if (!garantias) ok = false;
+    const garantias = ['g-investigacion', 'g-descargos', 'g-notificado'].every((id) => $(id).checked);
+    $('g-error').textContent = garantias ? '' : 'Marque las tres confirmaciones para guardar.';
+    if (!garantias) ok = false;
+  }
 
   return ok;
 }
@@ -286,8 +291,8 @@ $('form').addEventListener('submit', async (e) => {
       inicio: $('inicio').value,
       fin: $('fin').value,
       novedades: ['nov1', 'nov2', 'nov3'].map((id) => $(id).value).filter(Boolean),
-      expediente: $('expediente').value.trim(),
-      caducidad: $('caducidad').value,
+      expediente: $('expediente').value.trim() || null,
+      caducidad: $('caducidad').value || null,
       investigacion_cerrada: $('g-investigacion').checked,
       descargos: $('g-descargos').checked,
       notificado: $('g-notificado').checked,
@@ -446,3 +451,4 @@ initSelects();
   if (data.session) await entrar();
   else mostrar('login');
 })();
+
